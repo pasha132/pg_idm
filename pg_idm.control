@@ -1,0 +1,4 @@
+comment = 'Lightweight PostgreSQL extension for DML-like role management'
+default_version = '1.0'
+relocatable = false
+superuser = false

@@ -1,0 +1,26 @@
+begin;
+insert into idm.roles (rolname) values ('test_role_001_without_options');
+insert into idm.roles (rolname, rolsuper) values ('test_role_002_with_superuser', true);
+insert into idm.roles (rolname, rolcreatedb) values ('test_role_003_with_createdb', true);
+select
+    rolname,
+    rolsuper,
+    rolinherit,
+    rolcreaterole,
+    rolcreatedb,
+    rolcanlogin,
+    rolreplication,
+    rolconnlimit,
+    rolvaliduntil,
+    rolbypassrls
+from idm.roles
+where rolname like 'test_role_%'
+order by rolname;
+            rolname            | rolsuper | rolinherit | rolcreaterole | rolcreatedb | rolcanlogin | rolreplication | rolconnlimit | rolvaliduntil | rolbypassrls 
+-------------------------------+----------+------------+---------------+-------------+-------------+----------------+--------------+---------------+--------------
+ test_role_001_without_options | f        | t          | f             | f           | f           | f              |           -1 |               | f
+ test_role_002_with_superuser  | t        | t          | f             | f           | f           | f              |           -1 |               | f
+ test_role_003_with_createdb   | f        | t          | f             | t           | f           | f              |           -1 |               | f
+(3 rows)
+
+rollback;
