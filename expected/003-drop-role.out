@@ -1,0 +1,65 @@
+begin;
+insert into idm.roles (rolname) values ('test_role_001');
+insert into idm.roles (rolname) values ('test_role_002');
+select
+    rolname,
+    rolsuper,
+    rolinherit,
+    rolcreaterole,
+    rolcreatedb,
+    rolcanlogin,
+    rolreplication,
+    rolconnlimit,
+    to_char(rolvaliduntil, 'YYYY-MM-DD') as rolvaliduntil,
+    rolbypassrls
+from idm.roles
+where rolname like 'test_role_%'
+order by rolname;
+    rolname    | rolsuper | rolinherit | rolcreaterole | rolcreatedb | rolcanlogin | rolreplication | rolconnlimit | rolvaliduntil | rolbypassrls 
+---------------+----------+------------+---------------+-------------+-------------+----------------+--------------+---------------+--------------
+ test_role_001 | f        | t          | f             | f           | f           | f              |           -1 |               | f
+ test_role_002 | f        | t          | f             | f           | f           | f              |           -1 |               | f
+(2 rows)
+
+delete from idm.roles where rolname = 'test_role_001';
+select
+    rolname,
+    rolsuper,
+    rolinherit,
+    rolcreaterole,
+    rolcreatedb,
+    rolcanlogin,
+    rolreplication,
+    rolconnlimit,
+    to_char(rolvaliduntil, 'YYYY-MM-DD') as rolvaliduntil,
+    rolbypassrls
+from idm.roles
+where rolname like 'test_role_%'
+order by rolname;
+    rolname    | rolsuper | rolinherit | rolcreaterole | rolcreatedb | rolcanlogin | rolreplication | rolconnlimit | rolvaliduntil | rolbypassrls 
+---------------+----------+------------+---------------+-------------+-------------+----------------+--------------+---------------+--------------
+ test_role_002 | f        | t          | f             | f           | f           | f              |           -1 |               | f
+(1 row)
+
+with w_deleted as (
+    delete from idm.roles where rolname = 'test_role_002'
+    returning *
+)
+select
+    rolname,
+    rolsuper,
+    rolinherit,
+    rolcreaterole,
+    rolcreatedb,
+    rolcanlogin,
+    rolreplication,
+    rolconnlimit,
+    to_char(rolvaliduntil, 'YYYY-MM-DD') as rolvaliduntil,
+    rolbypassrls
+from w_deleted;
+    rolname    | rolsuper | rolinherit | rolcreaterole | rolcreatedb | rolcanlogin | rolreplication | rolconnlimit | rolvaliduntil | rolbypassrls 
+---------------+----------+------------+---------------+-------------+-------------+----------------+--------------+---------------+--------------
+ test_role_002 | f        | t          | f             | f           | f           | f              |           -1 |               | f
+(1 row)
+
+rollback;
