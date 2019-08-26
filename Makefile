@@ -1,9 +1,7 @@
 EXTENSION = pg_idm
 DATA = pg_idm--*.sql
 # DOCS = README
-REGRESS = 001-create-extension \
-          002-create-role \
-          003-drop-role
+REGRESS = $(sort $(patsubst sql/%.sql,%,$(wildcard sql/*.sql)))
 
 PG_CONFIG = pg_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)
