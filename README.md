@@ -64,6 +64,24 @@ select * from idm.roles order by rolname asc;
 (6 rows)
 ```
 
+#### Alter role
+To alter role use update statement:
+```sql
+insert into idm.roles (rolname) values ('new_role') returning *;
+  oid  | rolname  | rolsuper | rolinherit | rolcreaterole | rolcreatedb | rolcanlogin | rolreplication | rolconnlimit | rolvaliduntil | rolbypassrls 
+-------+----------+----------+------------+---------------+-------------+-------------+----------------+--------------+---------------+--------------
+ 19582 | new_role | f        | t          | f             | f           | f           | f              |           -1 |               | f
+(1 row)
+
+INSERT 0 1
+update idm.roles set rolconnlimit = 10, rolcanlogin = true where rolname = 'new_role' returning *;
+  oid  | rolname  | rolsuper | rolinherit | rolcreaterole | rolcreatedb | rolcanlogin | rolreplication | rolconnlimit | rolvaliduntil | rolbypassrls 
+-------+----------+----------+------------+---------------+-------------+-------------+----------------+--------------+---------------+--------------
+ 19582 | new_role | f        | t          | f             | f           | t           | f              |           10 |               | f
+(1 row)
+
+UPDATE 1
+```
 
 ## Installation
 
