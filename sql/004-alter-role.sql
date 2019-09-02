@@ -1,7 +1,7 @@
 begin;
 
 insert into idm.roles (rolname) values ('test_role_001');
-insert into idm.roles (rolname) values ('test_role_002');
+update idm.roles set rolname = 'test_role_002' where rolname = 'test_role_001';
 
 select
     rolname,
@@ -18,7 +18,18 @@ from idm.roles
 where rolname like 'test_role_%'
 order by rolname;
 
-delete from idm.roles where rolname = 'test_role_001';
+update idm.roles
+set
+    rolsuper = true,
+    rolinherit = false,
+    rolcreaterole = true,
+    rolcreatedb = true,
+    rolcanlogin = true,
+    rolreplication = true,
+    rolconnlimit = 10,
+    rolvaliduntil = to_timestamp('2000-01-01', 'YYYY-MM-DD'),
+    rolbypassrls = true
+where rolname = 'test_role_002';
 
 select
     rolname,
@@ -35,10 +46,12 @@ from idm.roles
 where rolname like 'test_role_%'
 order by rolname;
 
-with w_deleted as (
-    delete from idm.roles where rolname = 'test_role_002'
-    returning *
-)
+update idm.roles
+set
+    rolconnlimit = -1,
+    rolvaliduntil = null
+where rolname = 'test_role_002';
+
 select
     rolname,
     rolsuper,
@@ -50,8 +63,8 @@ select
     rolconnlimit,
     to_char(rolvaliduntil, 'YYYY-MM-DD') as rolvaliduntil,
     rolbypassrls
-from w_deleted;
-
-delete from idm.roles where rolname = 'test_role_002';
+from idm.roles
+where rolname like 'test_role_%'
+order by rolname;
 
 rollback;
