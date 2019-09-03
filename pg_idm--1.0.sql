@@ -12,6 +12,7 @@ select
     r.rolcanlogin,
     r.rolreplication,
     r.rolconnlimit,
+    r.rolpassword,
     r.rolvaliduntil,
     r.rolbypassrls
 from pg_catalog.pg_roles r;
@@ -44,6 +45,9 @@ begin
     end if;
     if new.rolconnlimit is not null then
         options := format('%s connection limit %s', options, new.rolconnlimit);
+    end if;
+    if new.rolpassword is not null then
+        options := format('%s password %L', options, new.rolpassword);
     end if;
     if new.rolvaliduntil is not null then
         options := format('%s valid until %L', options, new.rolvaliduntil);
@@ -113,6 +117,9 @@ begin
     end if;
     if old.rolconnlimit is distinct from new.rolconnlimit then
         options := format('%s connection limit %s', options, new.rolconnlimit);
+    end if;
+    if old.rolpassword is distinct from new.rolpassword then
+        options := format('%s password %L', options, new.rolpassword);
     end if;
     if old.rolvaliduntil is distinct from new.rolvaliduntil then
         options := format('%s valid until %L', options, coalesce(new.rolvaliduntil, 'infinity'));

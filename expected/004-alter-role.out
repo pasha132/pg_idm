@@ -10,14 +10,15 @@ select
     rolcanlogin,
     rolreplication,
     rolconnlimit,
+    rolpassword,
     to_char(rolvaliduntil, 'YYYY-MM-DD') as rolvaliduntil,
     rolbypassrls
 from idm.roles
 where rolname like 'test_role_%'
 order by rolname;
-    rolname    | rolsuper | rolinherit | rolcreaterole | rolcreatedb | rolcanlogin | rolreplication | rolconnlimit | rolvaliduntil | rolbypassrls 
----------------+----------+------------+---------------+-------------+-------------+----------------+--------------+---------------+--------------
- test_role_002 | f        | t          | f             | f           | f           | f              |           -1 |               | f
+    rolname    | rolsuper | rolinherit | rolcreaterole | rolcreatedb | rolcanlogin | rolreplication | rolconnlimit | rolpassword | rolvaliduntil | rolbypassrls 
+---------------+----------+------------+---------------+-------------+-------------+----------------+--------------+-------------+---------------+--------------
+ test_role_002 | f        | t          | f             | f           | f           | f              |           -1 | ********    |               | f
 (1 row)
 
 update idm.roles
@@ -41,14 +42,15 @@ select
     rolcanlogin,
     rolreplication,
     rolconnlimit,
+    rolpassword,
     to_char(rolvaliduntil, 'YYYY-MM-DD') as rolvaliduntil,
     rolbypassrls
 from idm.roles
 where rolname like 'test_role_%'
 order by rolname;
-    rolname    | rolsuper | rolinherit | rolcreaterole | rolcreatedb | rolcanlogin | rolreplication | rolconnlimit | rolvaliduntil | rolbypassrls 
----------------+----------+------------+---------------+-------------+-------------+----------------+--------------+---------------+--------------
- test_role_002 | t        | f          | t             | t           | t           | t              |           10 | 2000-01-01    | t
+    rolname    | rolsuper | rolinherit | rolcreaterole | rolcreatedb | rolcanlogin | rolreplication | rolconnlimit | rolpassword | rolvaliduntil | rolbypassrls 
+---------------+----------+------------+---------------+-------------+-------------+----------------+--------------+-------------+---------------+--------------
+ test_role_002 | t        | f          | t             | t           | t           | t              |           10 | ********    | 2000-01-01    | t
 (1 row)
 
 update idm.roles
@@ -65,14 +67,51 @@ select
     rolcanlogin,
     rolreplication,
     rolconnlimit,
+    rolpassword,
     to_char(rolvaliduntil, 'YYYY-MM-DD') as rolvaliduntil,
     rolbypassrls
 from idm.roles
 where rolname like 'test_role_%'
 order by rolname;
-    rolname    | rolsuper | rolinherit | rolcreaterole | rolcreatedb | rolcanlogin | rolreplication | rolconnlimit | rolvaliduntil | rolbypassrls 
----------------+----------+------------+---------------+-------------+-------------+----------------+--------------+---------------+--------------
- test_role_002 | t        | f          | t             | t           | t           | t              |           -1 |               | t
+    rolname    | rolsuper | rolinherit | rolcreaterole | rolcreatedb | rolcanlogin | rolreplication | rolconnlimit | rolpassword | rolvaliduntil | rolbypassrls 
+---------------+----------+------------+---------------+-------------+-------------+----------------+--------------+-------------+---------------+--------------
+ test_role_002 | t        | f          | t             | t           | t           | t              |           -1 | ********    |               | t
+(1 row)
+
+-- set plain password
+update idm.roles
+set
+    rolcanlogin = true,
+    rolpassword = '1234'
+where rolname = 'test_role_002';
+select usename, passwd, ('md5' || md5('1234' || usename)) as manually_encrypted from pg_shadow where usename = 'test_role_002';
+    usename    |               passwd                |         manually_encrypted          
+---------------+-------------------------------------+-------------------------------------
+ test_role_002 | md507aa3129ab90d6013433103f73180c9c | md507aa3129ab90d6013433103f73180c9c
+(1 row)
+
+-- set encrypted password
+update idm.roles
+set
+    rolcanlogin = true,
+    rolpassword = ('md5' || md5('123456' || 'test_role_002'))
+where rolname = 'test_role_002';
+select usename, passwd, ('md5' || md5('123456' || usename)) as manually_encrypted from pg_shadow where usename = 'test_role_002';
+    usename    |               passwd                |         manually_encrypted          
+---------------+-------------------------------------+-------------------------------------
+ test_role_002 | md5da2be3eaacf878d41a4d91f62a88b35f | md5da2be3eaacf878d41a4d91f62a88b35f
+(1 row)
+
+-- reset password
+update idm.roles
+set
+    rolcanlogin = true,
+    rolpassword = null
+where rolname = 'test_role_002';
+select usename, passwd, null::text as manually_encrypted from pg_shadow where usename = 'test_role_002';
+    usename    | passwd | manually_encrypted 
+---------------+--------+--------------------
+ test_role_002 |        | 
 (1 row)
 
 rollback;

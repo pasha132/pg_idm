@@ -12,6 +12,7 @@ select
     rolcanlogin,
     rolreplication,
     rolconnlimit,
+    rolpassword,
     to_char(rolvaliduntil, 'YYYY-MM-DD') as rolvaliduntil,
     rolbypassrls
 from idm.roles
@@ -29,6 +30,7 @@ select
     rolcanlogin,
     rolreplication,
     rolconnlimit,
+    rolpassword,
     to_char(rolvaliduntil, 'YYYY-MM-DD') as rolvaliduntil,
     rolbypassrls
 from idm.roles
@@ -48,6 +50,7 @@ select
     rolcanlogin,
     rolreplication,
     rolconnlimit,
+    rolpassword,
     to_char(rolvaliduntil, 'YYYY-MM-DD') as rolvaliduntil,
     rolbypassrls
 from w_deleted;
