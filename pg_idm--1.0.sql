@@ -88,7 +88,7 @@ create trigger drop_role_trg instead of delete on @extschema@.roles
 
 
 create function @extschema@.alter_role()
-    returns trigger security invoker  language plpgsql as
+    returns trigger security invoker language plpgsql as
 $function$
 declare
     options text := '';
@@ -137,3 +137,51 @@ $function$;
 
 create trigger alter_role_trg instead of update on @extschema@.roles
     for each row execute procedure @extschema@.alter_role();
+
+
+create or replace view @extschema@.auth_members as
+select
+    a.roleid,
+    a.member,
+    a.grantor,
+    a.admin_option
+from pg_auth_members a;
+
+
+create or replace function @extschema@.grant_role()
+    returns trigger security invoker language plpgsql as
+$function$
+declare
+    auth_members_rec record;
+begin
+    execute format(
+        'grant %I to %I %s',
+        new.roleid::regrole::text,
+        new.member::regrole::text,
+        case when new.admin_option then 'with admin option' else '' end
+    );
+
+    select * into auth_members_rec from @extschema@.auth_members am
+    where am.roleid = new.roleid and am.member = new.member;
+
+    return auth_members_rec;
+end;
+$function$;
+
+
+create trigger grant_role_trg instead of insert on auth_members
+    for each row execute procedure @extschema@.grant_role();
+
+
+create or replace function @extschema@.revoke_role()
+    returns trigger security invoker language plpgsql as
+$function$
+begin
+    execute format('revoke %I from %I', old.roleid::regrole::text, old.member::regrole::text);
+
+    return old;
+end;
+$function$;
+
+create trigger revoke_role_trg instead of delete on auth_members
+    for each row execute procedure @extschema@.revoke_role();
