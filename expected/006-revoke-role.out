@@ -1,0 +1,20 @@
+begin;
+create role test_group;
+create role test_role;
+insert into idm.auth_members (roleid, member)
+values ('test_group'::regrole, 'test_role'::regrole);
+select roleid::regrole::text, member::regrole::text, admin_option
+from idm.auth_members where member = 'test_role'::regrole;
+   roleid   |  member   | admin_option 
+------------+-----------+--------------
+ test_group | test_role | f
+(1 row)
+
+delete from idm.auth_members where member = 'test_role'::regrole;
+select roleid::regrole::text, member::regrole::text, admin_option
+from idm.auth_members where member = 'test_role'::regrole;
+ roleid | member | admin_option 
+--------+--------+--------------
+(0 rows)
+
+rollback;

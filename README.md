@@ -83,6 +83,31 @@ update idm.roles set rolconnlimit = 10, rolcanlogin = true where rolname = 'new_
 UPDATE 1
 ```
 
+#### Grant membership
+To grant membership use insert statement:
+```sql
+insert into idm.auth_members (roleid, member, admin_option)
+values ('test_group'::regrole, 'test_role'::regrole, false) returning *;
+ roleid | member | grantor | admin_option 
+--------+--------+---------+--------------
+  22561 |  22562 |      10 | f
+(1 row)
+
+INSERT 0 1
+```
+
+#### Revoke membership
+To revoke membership use delete statement:
+```sql
+postgres=# delete from idm.auth_members where member = 'test_role'::regrole returning *;
+ roleid | member | grantor | admin_option 
+--------+--------+---------+--------------
+  22561 |  22562 |      10 | f
+(1 row)
+
+DELETE 1
+```
+
 ## Installation
 
 Make sure the PostgreSQL extension building infrastructure is installed. If you installed PostgreSQL with installation packages, you usually need to install the "development"-Package.
